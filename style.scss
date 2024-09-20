@@ -1,0 +1,226 @@
+*{
+    margin: 0;
+    padding: 0;
+    }
+    .center {
+        padding-left: calc(50% - 600px);
+        padding-right: calc(50% - 600px);
+    }
+    
+    .fon{
+    background-color: rgba(225, 255, 143, 1);
+    background-image: url(./img/Group\ 1597880566.png), url(./img/star\ top.png),url(./img/star\ bottom.png);
+    background-repeat: no-repeat;
+    background-position: 210% 80%, 0% 5%, 70% 80%;
+    padding-top: 69px;
+    padding-bottom: 151px;
+    }
+    .star__top{
+        margin-left: 156px;
+        margin-right: 1249px;
+        
+    }
+    
+    .star__big_top{
+        margin-left: 63px;
+        margin-right: 1320px;
+    }
+    .mid{
+    padding-top: 45px;
+    padding-right: 551px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    }
+
+    .title{
+    font-family: Montserrat;
+    font-size: 64px;
+    font-weight: 600px;
+    line-height: 78.02px;
+    text-align: left;
+    padding-bottom: 24px;
+    
+    }
+    .text{
+    font-family: Montserrat;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    text-align: left;
+    padding-bottom: 48px;
+    
+    }
+    
+    
+    
+    .button_go{
+    text-decoration: none;
+    color:azure;
+    width: 247px;
+    background-color: black;;
+    gap: 10px;
+    border-radius: 60px;
+    border: 1px 0px 0px 0px;
+    font-family: Montserrat;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 34.01px;
+    text-align: center;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    margin-top: 48px;
+    }
+    .button_go:hover{
+        background-color: #fff;
+       color: black;
+    }
+    
+    
+    .star__bottom{
+    padding-left: 948px;
+    padding-right: 455px;
+    }
+    .star__bottom_big{
+        padding-left: 1013px;
+        padding-right: 344px;
+        margin-bottom: 59px;
+    }
+    .strip-bottom{
+    background: rgb(173, 226, 15);
+    height: 80px;
+    
+    }
+    
+    .text_footer{
+    font-family: Montserrat;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 33px;
+    letter-spacing: 0.04em;
+    text-align: left;
+    color: rgba(32, 32, 39, 1);
+    }
+    .game__box{
+    background: rgba(32, 32, 39, 1);
+    background-image: url(./img/Star\ 1.png),url(./img/star\ game.png);
+    background-repeat: no-repeat;
+    background-position: 100% 10%, 3% 57%;
+    padding-bottom: 50px;
+    }
+    
+    
+    .box-top{
+        display: block;
+        display: flex;
+        gap: 32px ;
+     
+    }
+    .box-bottom{
+    display: flex;
+    align-items: flex-end;
+    gap: 32px;
+    
+    }
+    .about-game{
+        padding-top: 94px;
+    }
+    .text-game{
+        width: 314px;
+        height: 78px;
+        font-family: Montserrat;
+        font-size: 64px;
+        font-weight: 700;
+        line-height: 78.02px;
+        text-align: left;
+        color: rgba(255, 255, 255, 1);
+        margin-bottom: 24px;
+    
+        
+    }
+    .text-bottom{
+    font-family: Montserrat;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 32px;
+    text-align: left;
+    color: rgba(255, 255, 255, 1);
+    margin-bottom: 72px;
+    }
+    .game-1 {
+    height: 473px;
+    background-color: #fff;
+    gap: 0px;
+    opacity: 0px;
+    border-radius: 30px 30px 30px 30px;
+    }
+    .game-2{
+    height: 512px;
+    background-color: #fff;
+    gap: 0px;
+    opacity: 0px;
+    border-radius: 30px 30px 30px 30px;
+    }
+    .game-4{
+    height: 551px;
+    background-color: #fff;
+    gap: 0px;
+    opacity: 0px;
+    border-radius: 30px 30px 30px 30px;
+    }
+    
+    
+    
+    .cart-fon{
+        padding: 32px 32px 36px 32px;
+        gap: 10px;
+        border-radius: 0px 0px 30px 30px;
+        opacity: 0px;
+    
+    }
+    .cart-text{
+        font-family: Montserrat;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 17.6px;
+        text-align: left;
+        color: black;
+        width: 80px;
+        margin-bottom: 16px;
+        padding-top: 32px;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding: 8px 16px 10px 16px;
+        gap: 0px;
+        border-radius: 52.58px ;
+        opacity: 0px;
+        background-color:rgba(247, 247, 247, 0.838);
+        ;
+    }
+    .cart-name {
+        font-family: Montserrat;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 39.01px;
+        text-align: left; 
+    }
+    .wrapper {
+        transform: 3s all;
+    
+       
+    
+    }
+    .wrapper:hover{
+    transform: scale(110%);
+    
+    }
+    .top{
+        display: none;
+    }
+    .footer{
+        display: none;
+    }
+
+    @import 'mobile'
+    
+    
