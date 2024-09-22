@@ -132,7 +132,7 @@ switch (month) {
     case 'december':
         alert('winter');
     break;
-
+    
     default: alert('Неверное значение');
         break;
 }
