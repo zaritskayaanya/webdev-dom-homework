@@ -60,7 +60,82 @@ result4 = privet + name3 + sign;
 alert( result4 );
 
 let info10 = prompt('Как твоё имя ?');
-alert(`Зaдание 10: Привет, ${info10}!`);
+alert(` Привет, ${info10}!`);
+
+let d = String(prompt('Введите пароль '));
+let c = String(prompt('Введите пароль '));
+if (c === d) {
+    alert('Пароль введен верно');
+} else {
+   alert('Пароль введен не верно');
+}
+
+let time = Number(prompt('Введите число '));
+if (time >=0 && time <=10) {
+    alert('Верно');
+} else {
+    alert('Неверно');
+    
+}
+
+let z = Number(prompt('Введите число '));
+let y = Number(prompt('Введите второе число '));
+if (z >=100) {
+    alert('Верно');
+} else if (y >=100) {
+    alert('Верно');
+} else {
+    alert('Неверно')
+}
+
+
+let q = '2';
+let w = '3';
+alert (Number('2') + 3);
+
+let month = String(prompt('Введите месяц '));
+month = month.toLocaleLowerCase();
+switch (month) {
+    case 'january':
+        alert('Winter');
+    break;
+    case 'february':
+        alert('Winter');
+    break;
+    case 'march':
+        alert('spring');
+    break;
+    case 'april':
+        alert('spring');
+    break;
+    case 'may':
+        alert('spring');
+    break;
+    case 'june':
+        alert('Summer');
+    break;
+    case 'jule':
+        alert('Summer');
+    break;
+    case 'august':
+        alert('Summer');
+    break;
+    case 'september':
+        alert('autumn');
+    break;
+    case 'october':
+        alert('autumn');
+    break;
+    case 'november':
+        alert('autumn');
+    break;
+    case 'december':
+        alert('winter');
+    break;
+
+    default: alert('Неверное значение');
+        break;
+}
 
 
 
