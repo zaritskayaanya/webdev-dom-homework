@@ -63,35 +63,25 @@ let info10 = prompt('Как твоё имя ?');
 alert(` Привет, ${info10}!`);
 
 let d = String(prompt('Введите пароль '));
-let c = String(prompt('Введите пароль '));
+const c = "xxx"
 if (c === d) {
     alert('Пароль введен верно');
 } else {
    alert('Пароль введен не верно');
 }
 
-let time = Number(prompt('Введите число '));
-if (time >=0 && time <=10) {
+let z = Number(prompt('Введите число '));
+let y = Number(prompt('Введите второе число '));
+if (z >=100 || y <=100) {
     alert('Верно');
 } else {
     alert('Неверно');
     
 }
 
-let z = Number(prompt('Введите число '));
-let y = Number(prompt('Введите второе число '));
-if (z >=100) {
-    alert('Верно');
-} else if (y >=100) {
-    alert('Верно');
-} else {
-    alert('Неверно')
-}
-
-
 let q = '2';
 let w = '3';
-alert (Number('2') + 3);
+alert(Number(q) + Number(w));
 
 let month = String(prompt('Введите месяц '));
 month = month.toLocaleLowerCase();

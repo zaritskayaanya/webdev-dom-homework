@@ -102,7 +102,7 @@
   color: rgb(32, 32, 39);
 }
 
-.game__box {
+.game_box {
   background: rgb(32, 32, 39);
   background-image: url(./img/Star\ 1.png), url(./img/star\ game.png);
   background-repeat: no-repeat;
@@ -122,11 +122,11 @@
   gap: 32px;
 }
 
-.about-game {
+.game__about {
   padding-top: 94px;
 }
 
-.text-game {
+.game__about_text {
   width: 314px;
   height: 78px;
   font-family: Montserrat;
@@ -216,7 +216,7 @@
 
 .top {
   height: 3500px;
-  background-color: black;
+  background: rgb(32, 32, 39);
   background-image: url(./img/starforgamestop.png), url(./img/starforgamesbottom.png);
   background-position: 92% 2%, 92% 98%;
   background-repeat: no-repeat;
