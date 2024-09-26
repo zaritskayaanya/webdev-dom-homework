@@ -170,7 +170,7 @@ Pet : '400'
  let dayFriday = 3;
  let allDay = 31;
  for (let i = dayFriday; i < allDay; i += 7) {
-    console.log(`Сегодня пятница, ${i}-е число.Подготовь отчет.`);
+ console.log(`Сегодня пятница, ${i}-е число.Подготовь отчет.`);
  }
 
 
