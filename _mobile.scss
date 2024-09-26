@@ -63,8 +63,9 @@ height: 51px;
 width: 375px;
 top: 700px;
 background: rgba(32, 32, 39, 1);
+height: 3782px;
 }
-.game__box{
+.game-box{
 display: none;
 }
 .top{
@@ -90,31 +91,55 @@ padding-bottom: 48px;
     padding-bottom: 48px;
 }
 .cart1 {
+    height: 528px;
     max-width: 343px;
     border-radius: 27.22px 27px 27px 27px;
-    background: rgba(255, 255, 255, 1);
-
+    background: rgba(255, 255, 255, 1);  
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
+
+.img-mini {
+    max-width: 343px;
+    height: 285px;
+    border-radius: 30px;
+    
+}
+.info {
+    padding-left: 29px;
+}
+
 .cart2 {
     width:343px;
     height: 567.63px;
     background-color: #fff;
     border-radius: 30px 30px 30px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 .cart3{
     width: 343px;
-    height: 626px;
     background-color: #fff;
     border-radius: 30px;
+    height: 606.63px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+.cart4 {
+    width: 343px;
+    background-color: #fff;
+    border-radius: 30px;
+    height: 626.63px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 
-.info{
-    padding-left: 29px;
-    padding-bottom: 32px;
-  
-}
-.text-gamemini {
+.text-gamemini  {
 font-family: Montserrat;
 font-size: 32px;
 font-weight: 700;
@@ -122,8 +147,7 @@ line-height: 39.01px;
 text-align: left;
 color: black;
 margin-top: 29px;
-margin-bottom: 16px;
-
+margin-bottom : 16px;
 }
 .text-random {
 font-family: Montserrat;
@@ -131,9 +155,6 @@ font-size: 16px;
 font-weight: 400;
 line-height: 19.5px;
 text-align: left;
-margin-bottom: 32px;
-width: 285px;
-height: 60px;
 }
 
 .button-mini {    
@@ -149,8 +170,9 @@ height: 60px;
     line-height: 22.67px;
     text-align: center;
     color: #fff;
-
+   margin-top: 32px;
     }
+
    .button-mini2{
     text-decoration: none;
     background-color: black;
@@ -186,15 +208,17 @@ height: 60px;
     padding-right: 16px;
     height: 100px;
 
+
     }
     .footer-text {
         font-family: Montserrat;
         font-size: 16px;
         font-weight: 600;
         line-height: 19.5px;
-        text-align: center;
+        text-align: center;  
         padding-top: 40px;
-               
+        padding-bottom: 40px;
+              
     }
 
 }
