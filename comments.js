@@ -122,7 +122,6 @@ async function sendComment() {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
         });
