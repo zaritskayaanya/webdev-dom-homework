@@ -112,9 +112,10 @@ async function sendComment() {
     const dateNow = new Date();
 
     const payload = {
-        author: { name },
+        //author: { name },
+        name,
         text,
-        date: dateNow.toISOString() // Передача даты в ISO формате
+        //date: dateNow.toISOString() // Передача даты в ISO формате
     };
 
     try {
