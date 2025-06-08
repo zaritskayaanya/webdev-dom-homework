@@ -70,23 +70,32 @@ function renderComments() {
             </li>`;
     });
     addQuoteOnCommentClick();
-    document.querySelectorAll('.like-button').forEach((button, idx) => {
-        button.addEventListener('click', () => toggleLike(idx));
-    });
+    addLikeButtonHandlers();
 }
 
 // Добавление цитаты при клике
 function addQuoteOnCommentClick() {
     document.querySelectorAll('.comment').forEach((commentElem, index) => {
+        // Обновляем обработчик клика
         commentElem.replaceWith(commentElem.cloneNode(true));
         commentElem = document.querySelectorAll('.comment')[index];
+
         commentElem.addEventListener('click', () => {
             const comment = commentsData[index];
             const sanitizedText = sanitizeInput(comment.text);
             const sanitizedName = sanitizeInput(comment.author.name);
             const quoteText = `> ${sanitizedText}\n`;
-            addFormNameInput.value = sanitizedName;
+            addFormNameInput.value = sanitizedName; // подставляем имя автора
             addFormTextInput.value = quoteText;
+        });
+    });
+}
+
+function addLikeButtonHandlers() {
+    document.querySelectorAll('.like-button').forEach((button, idx) => {
+        button.addEventListener('click', (event) => {
+            event.stopPropagation(); // Предотвращаем запуск цитирования при клике на лайк
+            toggleLike(idx);
         });
     });
 }
