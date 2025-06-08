@@ -28,21 +28,30 @@ function sanitizeInput(str) {
         .replaceAll("'", '&#39;');
 }
 
-// Загрузка комментариев
-async function loadComments() {
-    try {
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Ошибка: ${response.status} ${errorText}`);
-        }
-        const data = await response.json();
-        commentsData = data.comments;
-        renderComments();
-    } catch (error) {
-        console.error('Ошибка при загрузке комментариев:', error);
-        alert('Не удалось загрузить комментарии');
-    }
+// Вынесенная функция получения комментариев
+function fetchComments() {
+    return fetch(API_URL)
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Ошибка: ${response.status} ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            commentsData = data.comments;
+            renderComments();
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке комментариев:', error);
+            alert('Не удалось загрузить комментарии');
+        });
+}
+
+// Загрузка комментариев при инициализации
+function loadComments() {
+    fetchComments();
 }
 
 // Отображение комментариев
@@ -91,6 +100,7 @@ function addQuoteOnCommentClick() {
     });
 }
 
+// Обработчики лайков
 function addLikeButtonHandlers() {
     document.querySelectorAll('.like-button').forEach((button, idx) => {
         button.addEventListener('click', (event) => {
@@ -109,7 +119,7 @@ function toggleLike(index) {
 }
 
 // Отправка комментария
-async function sendComment() {
+function sendComment() {
     const nameRaw = addFormNameInput.value.trim();
     const textRaw = addFormTextInput.value.trim();
     if (nameRaw === "" || textRaw === "") {
@@ -121,34 +131,38 @@ async function sendComment() {
     const dateNow = new Date();
 
     const payload = {
-        //author: { name },
         name,
         text,
-        //date: dateNow.toISOString() // Передача даты в ISO формате
     };
 
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Ошибка: ${response.status} ${errorText}`);
+    fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+            'Accept': 'application/json',
         }
-        const newComment = await response.json();
-        // Можно обновить список комментариев
-        await loadComments();
-        // Очистить поля формы
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Ошибка: ${response.status} ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(() => {
+        // После успешной отправки перезагружаем список комментариев
+        return fetchComments();
+    })
+    .then(() => {
+        // Очищаем поля формы
         addFormNameInput.value = "";
         addFormTextInput.value = "";
-    } catch (error) {
+    })
+    .catch(error => {
         console.error('Ошибка при отправке комментария:', error);
         alert(`Не удалось отправить комментарий: ${error.message}`);
-    }
+    });
 }
 
 // Обработчик кнопки
