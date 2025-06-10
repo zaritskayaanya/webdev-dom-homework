@@ -13,20 +13,20 @@ addFormButton.disabled = true;
 
 // Показываем стартовый экран загрузки
 window.addEventListener('load', () => {
-  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'flex'; // показываем
   loadComments().then(() => {
-    // Активируем кнопку после загрузки комментариев
-    addFormButton.disabled = false;
+    document.getElementById('loading-screen').style.display = 'none'; // скрываем
+    addFormButton.disabled = false; // активируем кнопку
   });
 });
 
 // Функции для управления индикатором отправки комментария
 function showCommentLoading() {
-  commentLoadingDiv.style.display = 'flex';
+  document.getElementById('comment-loading').style.display = 'flex';
 }
 
-function hideCommentLoading() {
-  commentLoadingDiv.style.display = 'none';
+function showCommentLoading() {
+  document.getElementById('comment-loading').style.display = 'flex';
 }
 
 // Форматирование даты
@@ -143,23 +143,22 @@ function toggleLike(index) {
 
 // Отправка комментария
 function sendComment() {
-  // Блокируем кнопку при начале отправки
   addFormButton.disabled = true;
+  showCommentLoading();
 
   const nameRaw = addFormNameInput.value.trim();
   const textRaw = addFormTextInput.value.trim();
 
   if (nameRaw === "" || textRaw === "") {
     alert("Пожалуйста, заполните все поля!");
-    addFormButton.disabled = false; // разблокируем, если есть ошибка
+    addFormButton.disabled = false;
+    hideCommentLoading();
     return;
   }
 
   const name = sanitizeInput(nameRaw);
   const text = sanitizeInput(textRaw);
   const payload = { name, text };
-
-  showCommentLoading();
 
   fetch(API_URL, {
     method: 'POST',
@@ -189,7 +188,6 @@ function sendComment() {
   })
   .finally(() => {
     hideCommentLoading();
-    // Разблокируем кнопку после завершения
     addFormButton.disabled = false;
   });
 }
@@ -198,3 +196,4 @@ function sendComment() {
 addFormButton.addEventListener("click", () => {
   sendComment();
 });
+

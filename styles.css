@@ -161,3 +161,7 @@ body {
     opacity: 0.9;
     transform: scale(1.02);
   }
+
+  .comment-loading {
+    display: none;
+  }
