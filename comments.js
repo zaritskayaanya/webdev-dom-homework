@@ -7,26 +7,27 @@ const addFormNameInput = document.querySelector('.add-form-name');
 const addFormTextInput = document.querySelector('.add-form-text');
 const commentsList = document.querySelector('.comments');
 const commentLoadingDiv = document.getElementById('comment-loading');
+const loadingScreen = document.getElementById('loading-screen');
 
 // Изначально блокируем кнопку
 addFormButton.disabled = true;
 
-// Показываем стартовый экран загрузки
+// Показываем лоадер при старте сайта
 window.addEventListener('load', () => {
-  document.getElementById('loading-screen').style.display = 'flex'; // показываем
+  loadingScreen.style.display = 'flex'; // показываем
   loadComments().then(() => {
-    document.getElementById('loading-screen').style.display = 'none'; // скрываем
+    loadingScreen.style.display = 'none'; // скрываем
     addFormButton.disabled = false; // активируем кнопку
   });
 });
 
 // Функции для управления индикатором отправки комментария
 function showCommentLoading() {
-  document.getElementById('comment-loading').style.display = 'flex';
+  commentLoadingDiv.style.display = 'flex';
 }
 
-function showCommentLoading() {
-  document.getElementById('comment-loading').style.display = 'flex';
+function hideCommentLoading() {
+  commentLoadingDiv.style.display = 'none';
 }
 
 // Форматирование даты
@@ -51,7 +52,7 @@ function sanitizeInput(str) {
 
 let commentsData = [];
 
-// Вынесенная функция получения комментариев
+// Загрузка комментариев
 function fetchComments() {
   return fetch(API_URL)
     .then(response => {
@@ -72,7 +73,6 @@ function fetchComments() {
     });
 }
 
-// Загрузка комментариев при инициализации
 function loadComments() {
   return fetchComments();
 }
@@ -105,10 +105,10 @@ function renderComments() {
   addLikeButtonHandlers();
 }
 
-// Добавление цитаты при клике
+// Обработка цитаты
 function addQuoteOnCommentClick() {
   document.querySelectorAll('.comment').forEach((commentElem, index) => {
-    // Обновляем обработчик клика
+    // Обновляем обработчик
     commentElem.replaceWith(commentElem.cloneNode(true));
     commentElem = document.querySelectorAll('.comment')[index];
 
@@ -123,17 +123,16 @@ function addQuoteOnCommentClick() {
   });
 }
 
-// Обработчики лайков
+// Обработка лайков
 function addLikeButtonHandlers() {
   document.querySelectorAll('.like-button').forEach((button, idx) => {
     button.addEventListener('click', (event) => {
-      event.stopPropagation(); // Предотвращаем запуск цитирования при клике на лайк
+      event.stopPropagation();
       toggleLike(idx);
     });
   });
 }
 
-// Переключение лайка
 function toggleLike(index) {
   const comment = commentsData[index];
   comment.isLiked = !comment.isLiked;
@@ -143,6 +142,7 @@ function toggleLike(index) {
 
 // Отправка комментария
 function sendComment() {
+  // Блокируем кнопку
   addFormButton.disabled = true;
   showCommentLoading();
 
@@ -196,4 +196,3 @@ function sendComment() {
 addFormButton.addEventListener("click", () => {
   sendComment();
 });
-
