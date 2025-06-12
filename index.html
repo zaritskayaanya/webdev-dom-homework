@@ -6,17 +6,26 @@
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="container">
-  <ul class="comments"></ul>
-  <div class="add-form">
-    <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-    <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
-    <div class="add-form-row">
-      <button class="add-form-button">Написать</button>
+  <div id="loading-screen" class="loading-screen">
+    <div class="spinner">
     </div>
+    <p>Загрузка...</p>
   </div>
+  <div class="container">
+    <ul class="comments"></ul>
+    <div class="add-form">
+      <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
+      <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
+      <div class="add-form-row">
+        <button class="add-form-button">Написать
+        </button>
+      </div>
+   </div>
+  </div>
+  <div id="comment-loading" class="comment-loading" style="display: none;">
+  <div class="spinner"></div>
+  <span>Отправка комментария...</span>
 </div>
-
 <script src="comments.js"></script>
 </body>
 </html>
