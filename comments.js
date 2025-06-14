@@ -177,18 +177,17 @@ function sendComment() {
     return;
   }
 
-  // Для теста: добавьте forceError: true в теле запроса, чтобы проверить 500-ю ошибку
   const payload = {
     name,
     text,
-    forceError: false // установите true для теста 500-й ошибки
+    forceError: false 
   };
 
   fetch(API_URL, {
     method: 'POST',
     body: JSON.stringify(payload),
     headers: {
-      'Content-Type': 'application/json'
+     // 'Content-Type': 'application/json'
     }
   })
   .then(response => {
@@ -208,7 +207,7 @@ function sendComment() {
     return fetchComments();
   })
   .then(() => {
-    // Не сбрасываем поля, т.к. переменные хранят текущие значения
+    
   })
   .catch(error => {
     if (error.message.includes('Failed to fetch')) {
