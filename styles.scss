@@ -163,5 +163,11 @@ body {
   }
 
   .comment-loading {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
   }
