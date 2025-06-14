@@ -9,15 +9,24 @@ const commentsList = document.querySelector('.comments');
 const commentLoadingDiv = document.getElementById('comment-loading');
 const loadingScreen = document.getElementById('loading-screen');
 
-// Изначально блокируем кнопку
-addFormButton.disabled = true;
+let formData = {
+  name: '',
+  text: ''
+};
 
-// Показываем лоадер при старте сайта
+// Обновляем переменные при вводе
+addFormNameInput.addEventListener('input', () => {
+  formData.name = addFormNameInput.value;
+});
+addFormTextInput.addEventListener('input', () => {
+  formData.text = addFormTextInput.value;
+});
+
+// Показываем/скрываем лоадер загрузки комментариев
 window.addEventListener('load', () => {
-  loadingScreen.style.display = 'flex'; // показываем
+  loadingScreen.style.display = 'flex';
   loadComments().then(() => {
-    loadingScreen.style.display = 'none'; // скрываем
-    addFormButton.disabled = false; // активируем кнопку
+    loadingScreen.style.display = 'none';
   });
 });
 
@@ -25,7 +34,6 @@ window.addEventListener('load', () => {
 function showCommentLoading() {
   commentLoadingDiv.style.display = 'flex';
 }
-
 function hideCommentLoading() {
   commentLoadingDiv.style.display = 'none';
 }
@@ -40,7 +48,7 @@ function formatDate(date) {
   return `${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
-// Безопасная обработка ввода
+// Безопасная обработка
 function sanitizeInput(str) {
   return str
     .replaceAll('&', '&amp;')
@@ -57,9 +65,12 @@ function fetchComments() {
   return fetch(API_URL)
     .then(response => {
       if (!response.ok) {
-        return response.text().then(text => {
-          throw new Error(`Ошибка: ${response.status} ${text}`);
-        });
+        if (response.status === 500) {
+          alert('Ошибка сервера при загрузке комментариев. Попробуйте позже.');
+        } else {
+          alert(`Ошибка при загрузке комментариев: ${response.status}`);
+        }
+        throw new Error(`HTTP ${response.status}`);
       }
       return response.json();
     })
@@ -68,8 +79,11 @@ function fetchComments() {
       renderComments();
     })
     .catch(error => {
-      console.error('Ошибка при загрузке комментариев:', error);
-      alert('Не удалось загрузить комментарии');
+      if (error.message.includes('Failed to fetch')) {
+        alert('Проблемы с соединением: проверьте интернет');
+      } else {
+        console.error('Ошибка:', error);
+      }
     });
 }
 
@@ -119,6 +133,9 @@ function addQuoteOnCommentClick() {
       const quoteText = `> ${sanitizedText}\n`;
       addFormNameInput.value = sanitizedName;
       addFormTextInput.value = quoteText;
+      // Обновляем переменные
+      formData.name = sanitizedName;
+      formData.text = quoteText;
     });
   });
 }
@@ -146,32 +163,43 @@ function sendComment() {
   addFormButton.disabled = true;
   showCommentLoading();
 
-  const nameRaw = addFormNameInput.value.trim();
-  const textRaw = addFormTextInput.value.trim();
+  // Вставляем текущие данные из переменной
+  addFormNameInput.value = formData.name;
+  addFormTextInput.value = formData.text;
 
-  if (nameRaw === "" || textRaw === "") {
+  const name = formData.name.trim();
+  const text = formData.text.trim();
+
+  if (name === "" || text === "") {
     alert("Пожалуйста, заполните все поля!");
     addFormButton.disabled = false;
     hideCommentLoading();
     return;
   }
 
-  const name = sanitizeInput(nameRaw);
-  const text = sanitizeInput(textRaw);
-  const payload = { name, text };
+  const payload = {
+    name,
+    text,
+    forceError: false 
+  };
 
   fetch(API_URL, {
     method: 'POST',
     body: JSON.stringify(payload),
     headers: {
-      'Accept': 'application/json',
+     // 'Content-Type': 'application/json'
     }
   })
   .then(response => {
     if (!response.ok) {
-      return response.text().then(text => {
-        throw new Error(`Ошибка: ${response.status} ${text}`);
-      });
+      if (response.status === 400) {
+        alert('Ошибка: неверные данные при добавлении комментария');
+      } else if (response.status === 500) {
+        alert('Ошибка сервера при добавлении комментария. Попробуйте позже.');
+      } else {
+        alert(`Произошла ошибка: ${response.status}`);
+      }
+      throw new Error(`HTTP ${response.status}`);
     }
     return response.json();
   })
@@ -179,12 +207,14 @@ function sendComment() {
     return fetchComments();
   })
   .then(() => {
-    addFormNameInput.value = "";
-    addFormTextInput.value = "";
+    
   })
   .catch(error => {
-    console.error('Ошибка при отправке комментария:', error);
-    alert(`Не удалось отправить комментарий: ${error.message}`);
+    if (error.message.includes('Failed to fetch')) {
+      alert('Проблемы с соединением: проверьте интернет');
+    } else {
+      console.error('Ошибка:', error);
+    }
   })
   .finally(() => {
     hideCommentLoading();
@@ -196,3 +226,4 @@ function sendComment() {
 addFormButton.addEventListener("click", () => {
   sendComment();
 });
+
