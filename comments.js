@@ -20,7 +20,7 @@ const loginSubmitBtn = document.getElementById('login-submit');
 let commentsData = [];
 let isAuth = false;
 
-// Проверка статуса авторизации
+// Проверка авторизации
 function checkAuth() {
   return !!localStorage.getItem('authToken');
 }
@@ -70,17 +70,21 @@ function renderComments() {
   commentsData.forEach((comment, index) => {
     const date = new Date(comment.date);
     const formattedDate = formatDate(date);
-    const likeClass = comment.isLiked ? 'like-active' : '';
+    const likeClass = comment.isLiked ? '-active-like' : '';
     commentsEl.innerHTML += `
-      <li class="comment" data-index="${index}" style="border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:4px;">
-        <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:5px;">
+      <li class="comment" data-index="${index}">
+        <div class="comment-header">
           <div>${sanitizeInput(comment.author.name)}</div>
           <div>${formattedDate}</div>
         </div>
-        <div style="margin-bottom:5px;">${sanitizeInput(comment.text)}</div>
-        <div style="display:flex; align-items:center;">
-          <button class="like-button ${likeClass}" style="border:none; background:none; cursor:pointer; margin-right:8px;">👍</button>
-          <span class="likes-count">${comment.likes}</span>
+        <div class="comment-body">
+          <div class="comment-text">${sanitizeInput(comment.text)}</div>
+        </div>
+        <div class="comment-footer">
+          <div class="likes">
+            <button class="like-button ${likeClass}"></button>
+            <div class="likes-counter">${comment.likes}</div>
+          </div>
         </div>
       </li>
     `;
@@ -146,7 +150,7 @@ function sendComment() {
   }
 
   addButton.disabled = true;
-  document.getElementById('comment-loading').style.display = 'flex';
+  document.querySelector('.comment-loading').style.display = 'flex';
 
   const name = addNameEl.value.trim();
   const text = addTextEl.value.trim();
@@ -154,7 +158,7 @@ function sendComment() {
   if (!name || !text) {
     alert('Заполните все поля');
     addButton.disabled = false;
-    document.getElementById('comment-loading').style.display = 'none';
+    document.querySelector('.comment-loading').style.display = 'none';
     return;
   }
 
@@ -182,7 +186,7 @@ function sendComment() {
   })
   .finally(() => {
     addButton.disabled = false;
-    document.getElementById('comment-loading').style.display = 'none';
+    document.querySelector('.comment-loading').style.display = 'none';
   });
 }
 
@@ -215,7 +219,7 @@ document.getElementById('btn-logout').onclick = () => {
   updateUI();
 };
 
-// Обработка закрытия модального окна
+// Обработка закрытия модального окна при клике вне содержимого
 loginModal.onclick = (e) => {
   if (e.target === loginModal) {
     loginModal.style.display = 'none';

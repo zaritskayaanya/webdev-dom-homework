@@ -1,47 +1,48 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<title>Проект "Комменты"</title>
+<meta charset="UTF-8" />
+<title>Лента комментариев</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Загрузка -->
-  <div id="loading-screen" class="loading-screen">
-    <div class="spinner"></div>
-    <p>Загрузка...</p>
+
+<!-- Загрузка -->
+<div id="loading-screen" class="loading-screen">
+  <div class="spinner"></div>
+  <p>Загрузка...</p>
+</div>
+
+<!-- Основной контейнер -->
+<div class="container">
+  <!-- Кнопки входа/выхода -->
+  <div class="auth-buttons">
+    <button id="btn-login">Войти</button>
+    <button id="btn-logout" style="display:none;">Выйти</button>
   </div>
 
-  <!-- Основной контейнер -->
-  <div class="container">
-    <!-- Кнопки входа/выхода -->
-    <div class="auth-buttons">
-      <button id="btn-login">Войти</button>
-      <button id="btn-logout" style="display:none;">Выйти</button>
-    </div>
-
-    <!-- Форма добавления комментария -->
-    <div class="add-form">
-      <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-      <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
-      <div class="add-form-row">
-        <button class="add-form-button">Написать</button>
-      </div>
-    </div>
-
-    <!-- Список комментариев -->
-    <ul class="comments"></ul>
-  </div>
-
-  <!-- Страница входа (модальное окно) -->
-  <div id="login-modal" class="modal">
-    <div class="modal-content">
-      <h2>Войти</h2>
-      <input type="text" id="login-input" placeholder="Логин" />
-      <input type="password" id="password-input" placeholder="Пароль" />
-      <button id="login-submit">Войти</button>
+  <!-- Форма добавления комментария -->
+  <div class="add-form">
+    <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
+    <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
+    <div class="add-form-row">
+      <button class="add-form-button">Написать</button>
     </div>
   </div>
+
+  <!-- Список комментариев -->
+  <ul class="comments"></ul>
+</div>
+
+<!-- Модальное окно входа -->
+<div id="login-modal" class="modal">
+  <div class="modal-content">
+    <h2>Войти</h2>
+    <input type="text" id="login-input" placeholder="Логин" />
+    <input type="password" id="password-input" placeholder="Пароль" />
+    <button id="login-submit">Войти</button>
+  </div>
+</div>
 
 <script src="comments.js"></script>
 </body>
