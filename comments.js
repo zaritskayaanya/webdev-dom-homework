@@ -2,53 +2,104 @@
 
 const API_URL = "https://wedev-api.sky.pro/api/v1/zaritskayaanya/comments";
 
-const addFormButton = document.querySelector('.add-form-button');
-const addFormNameInput = document.querySelector('.add-form-name');
-const addFormTextInput = document.querySelector('.add-form-text');
-const commentsList = document.querySelector('.comments');
-const commentLoadingDiv = document.getElementById('comment-loading');
+const commentsEl = document.querySelector('.comments');
+const addNameEl = document.querySelector('.add-form-name');
+const addTextEl = document.querySelector('.add-form-text');
+const addButton = document.querySelector('.add-form-button');
+
 const loadingScreen = document.getElementById('loading-screen');
 
-let formData = {
-  name: '',
-  text: ''
-};
+const btnLogin = document.getElementById('btn-login');
+const btnLogout = document.getElementById('btn-logout');
 
-// Обновляем переменные при вводе
-addFormNameInput.addEventListener('input', () => {
-  formData.name = addFormNameInput.value;
-});
-addFormTextInput.addEventListener('input', () => {
-  formData.text = addFormTextInput.value;
-});
+const loginModal = document.getElementById('login-modal');
+const loginInput = document.getElementById('login-input');
+const passwordInput = document.getElementById('password-input');
+const loginSubmitBtn = document.getElementById('login-submit');
 
-// Показываем/скрываем лоадер загрузки комментариев
-window.addEventListener('load', () => {
-  loadingScreen.style.display = 'flex';
-  loadComments().then(() => {
-    loadingScreen.style.display = 'none';
-  });
-});
+let commentsData = [];
+let isAuth = false;
 
-// Функции для управления индикатором отправки комментария
-function showCommentLoading() {
-  commentLoadingDiv.style.display = 'flex';
+// Проверка статуса авторизации
+function checkAuth() {
+  return !!localStorage.getItem('authToken');
 }
-function hideCommentLoading() {
-  commentLoadingDiv.style.display = 'none';
+
+// Обновление UI в зависимости от статуса
+function updateUI() {
+  isAuth = checkAuth();
+  if (isAuth) {
+    addButton.disabled = false;
+    btnLogin.style.display = 'none';
+    btnLogout.style.display = 'inline-block';
+  } else {
+    addButton.disabled = true;
+    btnLogin.style.display = 'inline-block';
+    btnLogout.style.display = 'none';
+  }
+}
+
+// Загрузка комментариев
+function loadComments() {
+  loadingScreen.style.display = 'flex';
+  fetch(API_URL)
+    .then(res => {
+      if (!res.ok) {
+        if (res.status === 500) alert('Ошибка сервера при загрузке комментариев.');
+        else alert(`Ошибка при загрузке комментариев: ${res.status}`);
+        throw new Error(`HTTP ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      commentsData = data.comments;
+      renderComments();
+    })
+    .catch(err => {
+      if (err.message.includes('Failed to fetch')) alert('Проблемы с соединением.');
+      else console.error(err);
+    })
+    .finally(() => {
+      loadingScreen.style.display = 'none';
+    });
+}
+
+// Отрисовка комментариев
+function renderComments() {
+  commentsEl.innerHTML = '';
+  commentsData.forEach((comment, index) => {
+    const date = new Date(comment.date);
+    const formattedDate = formatDate(date);
+    const likeClass = comment.isLiked ? 'like-active' : '';
+    commentsEl.innerHTML += `
+      <li class="comment" data-index="${index}" style="border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:4px;">
+        <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:5px;">
+          <div>${sanitizeInput(comment.author.name)}</div>
+          <div>${formattedDate}</div>
+        </div>
+        <div style="margin-bottom:5px;">${sanitizeInput(comment.text)}</div>
+        <div style="display:flex; align-items:center;">
+          <button class="like-button ${likeClass}" style="border:none; background:none; cursor:pointer; margin-right:8px;">👍</button>
+          <span class="likes-count">${comment.likes}</span>
+        </div>
+      </li>
+    `;
+  });
+  addQuoteHandlers();
+  addLikeHandlers();
 }
 
 // Форматирование даты
 function formatDate(date) {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${day}.${month}.${year} ${hours}:${minutes}`;
+  const d = String(date.getDate()).padStart(2,'0');
+  const m = String(date.getMonth() + 1).padStart(2,'0');
+  const y = date.getFullYear();
+  const hh = String(date.getHours()).padStart(2,'0');
+  const mm = String(date.getMinutes()).padStart(2,'0');
+  return `${d}.${m}.${y} ${hh}:${mm}`;
 }
 
-// Безопасная обработка
+// Безопасное отображение
 function sanitizeInput(str) {
   return str
     .replaceAll('&', '&amp;')
@@ -58,95 +109,25 @@ function sanitizeInput(str) {
     .replaceAll("'", '&#39;');
 }
 
-let commentsData = [];
-
-// Загрузка комментариев
-function fetchComments() {
-  return fetch(API_URL)
-    .then(response => {
-      if (!response.ok) {
-        if (response.status === 500) {
-          alert('Ошибка сервера при загрузке комментариев. Попробуйте позже.');
-        } else {
-          alert(`Ошибка при загрузке комментариев: ${response.status}`);
-        }
-        throw new Error(`HTTP ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      commentsData = data.comments;
-      renderComments();
-    })
-    .catch(error => {
-      if (error.message.includes('Failed to fetch')) {
-        alert('Проблемы с соединением: проверьте интернет');
-      } else {
-        console.error('Ошибка:', error);
-      }
-    });
-}
-
-function loadComments() {
-  return fetchComments();
-}
-
-// Отображение комментариев
-function renderComments() {
-  commentsList.innerHTML = '';
-  commentsData.forEach((comment, index) => {
-    const likeActiveClass = comment.isLiked ? "-active-like" : "";
-    const dateObj = new Date(comment.date);
-    const formattedDate = formatDate(dateObj);
-    commentsList.innerHTML += `
-      <li class="comment" data-index="${index}">
-        <div class="comment-header">
-          <div>${sanitizeInput(comment.author.name)}</div>
-          <div>${formattedDate}</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">${sanitizeInput(comment.text)}</div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">${comment.likes}</span>
-            <button class="like-button ${likeActiveClass}"></button>
-          </div>
-        </div>
-      </li>`;
-  });
-  addQuoteOnCommentClick();
-  addLikeButtonHandlers();
-}
-
 // Обработка цитаты
-function addQuoteOnCommentClick() {
-  document.querySelectorAll('.comment').forEach((commentElem, index) => {
-    // Обновляем обработчик
-    commentElem.replaceWith(commentElem.cloneNode(true));
-    commentElem = document.querySelectorAll('.comment')[index];
-
-    commentElem.addEventListener('click', () => {
+function addQuoteHandlers() {
+  document.querySelectorAll('.comment').forEach((elem, index) => {
+    elem.onclick = () => {
       const comment = commentsData[index];
-      const sanitizedText = sanitizeInput(comment.text);
-      const sanitizedName = sanitizeInput(comment.author.name);
-      const quoteText = `> ${sanitizedText}\n`;
-      addFormNameInput.value = sanitizedName;
-      addFormTextInput.value = quoteText;
-      // Обновляем переменные
-      formData.name = sanitizedName;
-      formData.text = quoteText;
-    });
+      const quoteText = `> ${sanitizeInput(comment.text)}\n`;
+      addNameEl.value = sanitizeInput(comment.author.name);
+      addTextEl.value = quoteText;
+    };
   });
 }
 
 // Обработка лайков
-function addLikeButtonHandlers() {
-  document.querySelectorAll('.like-button').forEach((button, idx) => {
-    button.addEventListener('click', (event) => {
-      event.stopPropagation();
-      toggleLike(idx);
-    });
+function addLikeHandlers() {
+  document.querySelectorAll('.like-button').forEach((btn, index) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      toggleLike(index);
+    };
   });
 }
 
@@ -159,71 +140,92 @@ function toggleLike(index) {
 
 // Отправка комментария
 function sendComment() {
-  // Блокируем кнопку
-  addFormButton.disabled = true;
-  showCommentLoading();
-
-  // Вставляем текущие данные из переменной
-  addFormNameInput.value = formData.name;
-  addFormTextInput.value = formData.text;
-
-  const name = formData.name.trim();
-  const text = formData.text.trim();
-
-  if (name === "" || text === "") {
-    alert("Пожалуйста, заполните все поля!");
-    addFormButton.disabled = false;
-    hideCommentLoading();
+  if (!isAuth) {
+    alert('Пожалуйста, войдите, чтобы оставить комментарий.');
     return;
   }
 
-  const payload = {
-    name,
-    text,
-    forceError: false 
-  };
+  addButton.disabled = true;
+  document.getElementById('comment-loading').style.display = 'flex';
+
+  const name = addNameEl.value.trim();
+  const text = addTextEl.value.trim();
+
+  if (!name || !text) {
+    alert('Заполните все поля');
+    addButton.disabled = false;
+    document.getElementById('comment-loading').style.display = 'none';
+    return;
+  }
 
   fetch(API_URL, {
     method: 'POST',
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ name, text, forceError: false }),
     headers: {
-     // 'Content-Type': 'application/json'
+    //  'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + localStorage.getItem('authToken')
     }
   })
-  .then(response => {
-    if (!response.ok) {
-      if (response.status === 400) {
-        alert('Ошибка: неверные данные при добавлении комментария');
-      } else if (response.status === 500) {
-        alert('Ошибка сервера при добавлении комментария. Попробуйте позже.');
-      } else {
-        alert(`Произошла ошибка: ${response.status}`);
-      }
-      throw new Error(`HTTP ${response.status}`);
+  .then(res => {
+    if (!res.ok) {
+      if (res.status === 400) alert('Ошибка: неверные данные');
+      else if (res.status === 500) alert('Ошибка сервера');
+      else alert(`Ошибка: ${res.status}`);
+      throw new Error(`HTTP ${res.status}`);
     }
-    return response.json();
+    return res.json();
   })
-  .then(() => {
-    return fetchComments();
-  })
-  .then(() => {
-    
-  })
-  .catch(error => {
-    if (error.message.includes('Failed to fetch')) {
-      alert('Проблемы с соединением: проверьте интернет');
-    } else {
-      console.error('Ошибка:', error);
-    }
+  .then(() => loadComments())
+  .catch(err => {
+    if (err.message.includes('Failed to fetch')) alert('Проблемы с соединением');
+    else console.error(err);
   })
   .finally(() => {
-    hideCommentLoading();
-    addFormButton.disabled = false;
+    addButton.disabled = false;
+    document.getElementById('comment-loading').style.display = 'none';
   });
 }
 
-// Обработчик кнопки
-addFormButton.addEventListener("click", () => {
+// Обработчики кнопок
+addButton.onclick = () => {
   sendComment();
-});
+};
+
+document.getElementById('btn-login').onclick = () => {
+  loginModal.style.display = 'flex';
+};
+
+document.getElementById('login-submit').onclick = () => {
+  const login = loginInput.value.trim();
+  const password = passwordInput.value.trim();
+
+  // В реальности отправьте запрос на сервер
+  // Здесь фиктивный вход
+  if (login && password) {
+    localStorage.setItem('authToken', 'dummy-token');
+    loginModal.style.display = 'none';
+    updateUI();
+  } else {
+    alert('Введите логин и пароль');
+  }
+};
+
+document.getElementById('btn-logout').onclick = () => {
+  localStorage.removeItem('authToken');
+  updateUI();
+};
+
+// Обработка закрытия модального окна
+loginModal.onclick = (e) => {
+  if (e.target === loginModal) {
+    loginModal.style.display = 'none';
+  }
+};
+
+// Инициализация
+window.onload = () => {
+  loadComments();
+  updateUI();
+};
+
 
