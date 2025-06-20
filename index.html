@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<title>Лента комментариев</title>
+<title>Комментарии с авторизацией</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -21,17 +21,22 @@
     <button id="btn-logout" style="display:none;">Выйти</button>
   </div>
 
-  <!-- Форма добавления комментария -->
-  <div class="add-form">
+  <!-- Список комментариев -->
+  <ul class="comments"></ul>
+
+  <!-- Под комментариями — ссылка на вход/регистрацию -->
+  <div id="auth-link-container" style="margin-top:20px; text-align:center;">
+    <a href="#" id="auth-link">Войти / Регистрация</a>
+  </div>
+
+  <!-- Форма добавления комментария (скрыта, если не авторизован) -->
+  <div class="add-form" style="display:none;">
     <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
     <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
     <div class="add-form-row">
       <button class="add-form-button">Написать</button>
     </div>
   </div>
-
-  <!-- Список комментариев -->
-  <ul class="comments"></ul>
 </div>
 
 <!-- Модальное окно входа -->
@@ -41,6 +46,15 @@
     <input type="text" id="login-input" placeholder="Логин" />
     <input type="password" id="password-input" placeholder="Пароль" />
     <button id="login-submit">Войти</button>
+  </div>
+</div>
+
+<!-- Экран регистрации (можно оставить пустым или с заглушкой) -->
+<div id="register-screen" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h2>Регистрация</h2>
+    <p>Регистрация пока не реализована.</p>
+    <button id="close-register">Закрыть</button>
   </div>
 </div>
 

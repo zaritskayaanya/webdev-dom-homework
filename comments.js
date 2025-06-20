@@ -17,6 +17,10 @@ const loginInput = document.getElementById('login-input');
 const passwordInput = document.getElementById('password-input');
 const loginSubmitBtn = document.getElementById('login-submit');
 
+const authLink = document.getElementById('auth-link');
+const registerScreen = document.getElementById('register-screen');
+const closeRegisterBtn = document.getElementById('close-register');
+
 let commentsData = [];
 let isAuth = false;
 
@@ -25,15 +29,19 @@ function checkAuth() {
   return !!localStorage.getItem('authToken');
 }
 
-// Обновление UI в зависимости от статуса
+// Обновление UI
 function updateUI() {
   isAuth = checkAuth();
   if (isAuth) {
     addButton.disabled = false;
+    document.querySelector('.add-form').style.display = 'block';
+    document.querySelector('#auth-link').style.display = 'none';
     btnLogin.style.display = 'none';
     btnLogout.style.display = 'inline-block';
   } else {
     addButton.disabled = true;
+    document.querySelector('.add-form').style.display = 'none';
+    document.querySelector('#auth-link').style.display = 'block';
     btnLogin.style.display = 'inline-block';
     btnLogout.style.display = 'none';
   }
@@ -166,7 +174,7 @@ function sendComment() {
     method: 'POST',
     body: JSON.stringify({ name, text, forceError: false }),
     headers: {
-    //  'Content-Type': 'application/json',
+      'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + localStorage.getItem('authToken')
     }
   })
@@ -195,10 +203,12 @@ addButton.onclick = () => {
   sendComment();
 };
 
+// Вход через модальное окно
 document.getElementById('btn-login').onclick = () => {
   loginModal.style.display = 'flex';
 };
 
+// Войти по форме
 document.getElementById('login-submit').onclick = () => {
   const login = loginInput.value.trim();
   const password = passwordInput.value.trim();
@@ -214,9 +224,21 @@ document.getElementById('login-submit').onclick = () => {
   }
 };
 
-document.getElementById('btn-logout').onclick = () => {
+// Выйти
+btnLogout.onclick = () => {
   localStorage.removeItem('authToken');
   updateUI();
+};
+
+// Открытие экрана регистрации
+document.getElementById('auth-link').onclick = (e) => {
+  e.preventDefault();
+  registerScreen.style.display = 'flex';
+};
+
+// Закрытие экрана регистрации
+document.getElementById('close-register').onclick = () => {
+  registerScreen.style.display = 'none';
 };
 
 // Обработка закрытия модального окна при клике вне содержимого
