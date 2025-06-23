@@ -6,28 +6,20 @@
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
 <!-- Загрузка -->
 <div id="loading-screen" class="loading-screen">
   <div class="spinner"></div>
   <p>Загрузка...</p>
 </div>
-
 <!-- Основной контейнер -->
 <div class="container">
   <!-- Кнопки входа/выхода -->
-  <div class="auth-buttons">
-    <button id="btn-login">Войти</button>
-    <button id="btn-logout" style="display:none;">Выйти</button>
-  </div>
+<button id="btn-login">Войти</button>
+<button id="btn-logout" style="display:none;">Выйти</button>
+<a href="#" id="auth-link">Регистрация</a>
 
   <!-- Список комментариев -->
   <ul class="comments"></ul>
-
-  <!-- Под комментариями — ссылка на вход/регистрацию -->
-  <div id="auth-link-container" style="margin-top:20px; text-align:center;">
-    <a href="#" id="auth-link">Войти / Регистрация</a>
-  </div>
 
   <!-- Форма добавления комментария (скрыта, если не авторизован) -->
   <div class="add-form" style="display:none;">
@@ -36,29 +28,35 @@
     <div class="add-form-row">
       <button class="add-form-button">Написать</button>
     </div>
+    <!-- Добавляем элемент загрузки -->
+    <div class="comment-loading" style="display: none;">Загрузка...</div>
   </div>
-</div>
 
 <!-- Модальное окно входа -->
 <div id="login-modal" class="modal">
   <div class="modal-content">
     <h2>Войти</h2>
     <input type="text" id="login-input" placeholder="Логин" />
+    <br />
     <input type="password" id="password-input" placeholder="Пароль" />
+    <br />
     <button id="login-submit">Войти</button>
+    <button id="close-login">Отмена</button>
   </div>
 </div>
-
-<!-- Экран регистрации (можно оставить пустым или с заглушкой) -->
-<div id="register-screen" class="modal" style="display:none;">
+<!-- Экран регистрации -->
+<div id="register-screen" class="modal">
   <div class="modal-content">
     <h2>Регистрация</h2>
-    <p>Регистрация пока не реализована.</p>
-    <button id="close-register">Закрыть</button>
+    <input type="text" id="register-login" placeholder="Логин" />
+    <br />
+    <input type="password" id="register-password" placeholder="Пароль" />
+    <br />
+    <button id="register-submit">Зарегистрироваться</button>
+    <button id="close-register">Отмена</button>
   </div>
 </div>
 
 <script src="comments.js"></script>
 </body>
 </html>
-

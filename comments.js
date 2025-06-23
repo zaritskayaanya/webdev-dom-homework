@@ -6,8 +6,8 @@ const commentsEl = document.querySelector('.comments');
 const addNameEl = document.querySelector('.add-form-name');
 const addTextEl = document.querySelector('.add-form-text');
 const addButton = document.querySelector('.add-form-button');
-
 const loadingScreen = document.getElementById('loading-screen');
+const commentLoadingEl = document.querySelector('.comment-loading');
 
 const btnLogin = document.getElementById('btn-login');
 const btnLogout = document.getElementById('btn-logout');
@@ -15,11 +15,9 @@ const btnLogout = document.getElementById('btn-logout');
 const loginModal = document.getElementById('login-modal');
 const loginInput = document.getElementById('login-input');
 const passwordInput = document.getElementById('password-input');
-const loginSubmitBtn = document.getElementById('login-submit');
 
 const authLink = document.getElementById('auth-link');
 const registerScreen = document.getElementById('register-screen');
-const closeRegisterBtn = document.getElementById('close-register');
 
 let commentsData = [];
 let isAuth = false;
@@ -38,12 +36,26 @@ function updateUI() {
     document.querySelector('#auth-link').style.display = 'none';
     btnLogin.style.display = 'none';
     btnLogout.style.display = 'inline-block';
+    fillAuthorField();
   } else {
     addButton.disabled = true;
     document.querySelector('.add-form').style.display = 'none';
     document.querySelector('#auth-link').style.display = 'block';
     btnLogin.style.display = 'inline-block';
     btnLogout.style.display = 'none';
+    addNameEl.value = '';
+  }
+}
+
+// Заполняем поле автора из профиля
+function fillAuthorField() {
+  const authorField = document.querySelector('.add-form-name');
+  if (!authorField) return;
+  if (isAuth) {
+    const login = localStorage.getItem('userName') || 'Аноним';
+    authorField.value = login;
+  } else {
+    authorField.value = '';
   }
 }
 
@@ -144,6 +156,10 @@ function addLikeHandlers() {
 }
 
 function toggleLike(index) {
+  if (!isAuth) {
+    alert('Пожалуйста, войдите, чтобы ставить лайки.');
+    return;
+  }
   const comment = commentsData[index];
   comment.isLiked = !comment.isLiked;
   comment.likes += comment.isLiked ? 1 : -1;
@@ -157,8 +173,11 @@ function sendComment() {
     return;
   }
 
+  if (commentLoadingEl) {
+    commentLoadingEl.style.display = 'flex';
+  }
+
   addButton.disabled = true;
-  document.querySelector('.comment-loading').style.display = 'flex';
 
   const name = addNameEl.value.trim();
   const text = addTextEl.value.trim();
@@ -166,7 +185,9 @@ function sendComment() {
   if (!name || !text) {
     alert('Заполните все поля');
     addButton.disabled = false;
-    document.querySelector('.comment-loading').style.display = 'none';
+    if (commentLoadingEl) {
+      commentLoadingEl.style.display = 'none';
+    }
     return;
   }
 
@@ -180,10 +201,11 @@ function sendComment() {
   })
   .then(res => {
     if (!res.ok) {
-      if (res.status === 400) alert('Ошибка: неверные данные');
-      else if (res.status === 500) alert('Ошибка сервера');
-      else alert(`Ошибка: ${res.status}`);
-      throw new Error(`HTTP ${res.status}`);
+      return res.text().then(text => {
+        console.error('Ошибка при отправке:', res.status, text);
+        alert(`Ошибка при отправке комментария: ${res.status}`);
+        throw new Error(`HTTP ${res.status}`);
+      });
     }
     return res.json();
   })
@@ -194,7 +216,9 @@ function sendComment() {
   })
   .finally(() => {
     addButton.disabled = false;
-    document.querySelector('.comment-loading').style.display = 'none';
+    if (commentLoadingEl) {
+      commentLoadingEl.style.display = 'none';
+    }
   });
 }
 
@@ -212,13 +236,13 @@ document.getElementById('btn-login').onclick = () => {
 document.getElementById('login-submit').onclick = () => {
   const login = loginInput.value.trim();
   const password = passwordInput.value.trim();
-
-  // В реальности отправьте запрос на сервер
-  // Здесь фиктивный вход
   if (login && password) {
+    // В реальности — отправьте запрос и получите токен
     localStorage.setItem('authToken', 'dummy-token');
+    localStorage.setItem('userName', login);
     loginModal.style.display = 'none';
     updateUI();
+    fillAuthorField();
   } else {
     alert('Введите логин и пароль');
   }
@@ -227,6 +251,7 @@ document.getElementById('login-submit').onclick = () => {
 // Выйти
 btnLogout.onclick = () => {
   localStorage.removeItem('authToken');
+  localStorage.removeItem('userName');
   updateUI();
 };
 
@@ -236,22 +261,42 @@ document.getElementById('auth-link').onclick = (e) => {
   registerScreen.style.display = 'flex';
 };
 
-// Закрытие экрана регистрации
-document.getElementById('close-register').onclick = () => {
-  registerScreen.style.display = 'none';
+// Обработка регистрации
+document.getElementById('register-submit').onclick = () => {
+  const login = document.getElementById('register-login').value.trim();
+  const password = document.getElementById('register-password').value.trim();
+
+  if (!login || !password) {
+    alert('Пожалуйста, введите логин и пароль');
+    return;
+  }
+
+  // Имитация регистрации
+  localStorage.setItem('authToken', 'dummy-token');
+  localStorage.setItem('userName', login);
+  updateUI();
+  fillAuthorField();
+  document.getElementById('register-screen').style.display = 'none';
 };
 
-// Обработка закрытия модального окна при клике вне содержимого
+// Закрытие регистрации
+document.getElementById('close-register').onclick = () => {
+  document.getElementById('register-screen').style.display = 'none';
+};
+
+// Обработка закрытия модального окна входа
+document.getElementById('close-login').onclick = () => {
+  loginModal.style.display = 'none';
+};
+
+// Закрытие модальных окон при клике вне содержимого
 loginModal.onclick = (e) => {
-  if (e.target === loginModal) {
-    loginModal.style.display = 'none';
-  }
+  if (e.target === loginModal) loginModal.style.display = 'none';
 };
 
 // Инициализация
 window.onload = () => {
   loadComments();
   updateUI();
+  fillAuthorField();
 };
-
-
