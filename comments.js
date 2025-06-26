@@ -32,7 +32,7 @@ function updateUI() {
   isAuth = checkAuth();
   if (isAuth) {
     addButton.disabled = false;
-    document.querySelector('.add-form').style.display = 'block';
+    document.querySelector('.add-form').style.display = 'flex';
     document.querySelector('#auth-link').style.display = 'none';
     btnLogin.style.display = 'none';
     btnLogout.style.display = 'inline-block';
@@ -193,9 +193,8 @@ function sendComment() {
 
   fetch(API_URL, {
     method: 'POST',
-    body: JSON.stringify({ name, text, forceError: false }),
+    body: JSON.stringify({ name, text }),
     headers: {
-      'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + localStorage.getItem('authToken')
     }
   })
@@ -237,7 +236,7 @@ document.getElementById('login-submit').onclick = () => {
   const login = loginInput.value.trim();
   const password = passwordInput.value.trim();
   if (login && password) {
-    // В реальности — отправьте запрос и получите токен
+    // Используем фиктивный токен
     localStorage.setItem('authToken', 'dummy-token');
     localStorage.setItem('userName', login);
     loginModal.style.display = 'none';
