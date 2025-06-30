@@ -1,96 +1,111 @@
 "use strict";
 
-const API_URL = "https://wedev-api.sky.pro/api/v1/zaritskayaanya/comments";
+const API_COMMENTS_URL =
+  "https://wedev-api.sky.pro/api/v1/zaritskayaanya/comments";
+const API_USER_URL = "https://wedev-api.sky.pro/api/user";
+const API_LOGIN_URL = "https://wedev-api.sky.pro/api/user/login";
 
-const commentsEl = document.querySelector('.comments');
-const addNameEl = document.querySelector('.add-form-name');
-const addTextEl = document.querySelector('.add-form-text');
-const addButton = document.querySelector('.add-form-button');
-const loadingScreen = document.getElementById('loading-screen');
-const commentLoadingEl = document.querySelector('.comment-loading');
-
-const btnLogin = document.getElementById('btn-login');
-const btnLogout = document.getElementById('btn-logout');
-
-const loginModal = document.getElementById('login-modal');
-const loginInput = document.getElementById('login-input');
-const passwordInput = document.getElementById('password-input');
-
-const authLink = document.getElementById('auth-link');
-const registerScreen = document.getElementById('register-screen');
+const commentsEl = document.querySelector(".comments");
+const addNameEl = document.querySelector(".add-form-name");
+const addTextEl = document.querySelector(".add-form-text");
+const addButton = document.querySelector(".add-form-button");
+const loadingScreen = document.getElementById("loading-screen");
+const commentLoadingEl = document.querySelector(".comment-loading");
+const btnLogin = document.getElementById("btn-login");
+const btnLogout = document.getElementById("btn-logout");
+const loginModal = document.getElementById("login-modal");
+const loginInput = document.getElementById("login-input");
+const passwordInput = document.getElementById("password-input");
+const authLink = document.getElementById("auth-link");
+const registerScreen = document.getElementById("register-screen");
 
 let commentsData = [];
 let isAuth = false;
 
 // Проверка авторизации
-function checkAuth() {
-  return !!localStorage.getItem('authToken');
-}
-
-// Обновление UI
-function updateUI() {
-  isAuth = checkAuth();
-  if (isAuth) {
-    addButton.disabled = false;
-    document.querySelector('.add-form').style.display = 'flex';
-    document.querySelector('#auth-link').style.display = 'none';
-    btnLogin.style.display = 'none';
-    btnLogout.style.display = 'inline-block';
-    fillAuthorField();
-  } else {
-    addButton.disabled = true;
-    document.querySelector('.add-form').style.display = 'none';
-    document.querySelector('#auth-link').style.display = 'block';
-    btnLogin.style.display = 'inline-block';
-    btnLogout.style.display = 'none';
-    addNameEl.value = '';
+async function checkAuth() {
+  const token = localStorage.getItem("authToken");
+  if (!token) return false;
+  try {
+    const res = await fetch(API_USER_URL, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    });
+    if (res.ok) {
+      return true;
+    } else {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userName");
+      return false;
+    }
+  } catch {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userName");
+    return false;
   }
 }
 
-// Заполняем поле автора из профиля
+// Обновление UI
+async function updateUI() {
+  isAuth = await checkAuth();
+  if (isAuth) {
+    addButton.disabled = false;
+    document.querySelector(".add-form").style.display = "flex";
+    document.querySelector("#auth-link").style.display = "none";
+    btnLogin.style.display = "none";
+    btnLogout.style.display = "inline-block";
+    fillAuthorField();
+  } else {
+    addButton.disabled = true;
+    document.querySelector(".add-form").style.display = "none";
+    document.querySelector("#auth-link").style.display = "block";
+    btnLogin.style.display = "inline-block";
+    btnLogout.style.display = "none";
+    addNameEl.value = "";
+  }
+}
+
+// Заполняем имя автора
 function fillAuthorField() {
-  const authorField = document.querySelector('.add-form-name');
+  const authorField = document.querySelector(".add-form-name");
   if (!authorField) return;
   if (isAuth) {
-    const login = localStorage.getItem('userName') || 'Аноним';
+    const login = localStorage.getItem("userName") || "Аноним";
     authorField.value = login;
   } else {
-    authorField.value = '';
+    authorField.value = "";
   }
 }
 
 // Загрузка комментариев
-function loadComments() {
-  loadingScreen.style.display = 'flex';
-  fetch(API_URL)
-    .then(res => {
-      if (!res.ok) {
-        if (res.status === 500) alert('Ошибка сервера при загрузке комментариев.');
-        else alert(`Ошибка при загрузке комментариев: ${res.status}`);
-        throw new Error(`HTTP ${res.status}`);
-      }
-      return res.json();
-    })
-    .then(data => {
-      commentsData = data.comments;
-      renderComments();
-    })
-    .catch(err => {
-      if (err.message.includes('Failed to fetch')) alert('Проблемы с соединением.');
-      else console.error(err);
-    })
-    .finally(() => {
-      loadingScreen.style.display = 'none';
-    });
+async function loadComments() {
+  loadingScreen.style.display = "flex";
+  try {
+    const res = await fetch(API_COMMENTS_URL);
+    if (!res.ok) {
+      if (res.status === 500)
+        alert("Ошибка сервера при загрузке комментариев.");
+      else alert(`Ошибка при загрузке комментариев: ${res.status}`);
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    commentsData = data.comments;
+    renderComments();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    loadingScreen.style.display = "none";
+  }
 }
 
 // Отрисовка комментариев
 function renderComments() {
-  commentsEl.innerHTML = '';
+  commentsEl.innerHTML = "";
   commentsData.forEach((comment, index) => {
     const date = new Date(comment.date);
     const formattedDate = formatDate(date);
-    const likeClass = comment.isLiked ? '-active-like' : '';
+    const likeClass = comment.isLiked ? "-active-like" : "";
     commentsEl.innerHTML += `
       <li class="comment" data-index="${index}">
         <div class="comment-header">
@@ -115,27 +130,27 @@ function renderComments() {
 
 // Форматирование даты
 function formatDate(date) {
-  const d = String(date.getDate()).padStart(2,'0');
-  const m = String(date.getMonth() + 1).padStart(2,'0');
+  const d = String(date.getDate()).padStart(2, "0");
+  const m = String(date.getMonth() + 1).padStart(2, "0");
   const y = date.getFullYear();
-  const hh = String(date.getHours()).padStart(2,'0');
-  const mm = String(date.getMinutes()).padStart(2,'0');
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
   return `${d}.${m}.${y} ${hh}:${mm}`;
 }
 
 // Безопасное отображение
 function sanitizeInput(str) {
   return str
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 // Обработка цитаты
 function addQuoteHandlers() {
-  document.querySelectorAll('.comment').forEach((elem, index) => {
+  document.querySelectorAll(".comment").forEach((elem, index) => {
     elem.onclick = () => {
       const comment = commentsData[index];
       const quoteText = `> ${sanitizeInput(comment.text)}\n`;
@@ -147,7 +162,7 @@ function addQuoteHandlers() {
 
 // Обработка лайков
 function addLikeHandlers() {
-  document.querySelectorAll('.like-button').forEach((btn, index) => {
+  document.querySelectorAll(".like-button").forEach((btn, index) => {
     btn.onclick = (e) => {
       e.stopPropagation();
       toggleLike(index);
@@ -157,7 +172,7 @@ function addLikeHandlers() {
 
 function toggleLike(index) {
   if (!isAuth) {
-    alert('Пожалуйста, войдите, чтобы ставить лайки.');
+    alert("Пожалуйста, войдите, чтобы ставить лайки.");
     return;
   }
   const comment = commentsData[index];
@@ -167,58 +182,51 @@ function toggleLike(index) {
 }
 
 // Отправка комментария
-function sendComment() {
+async function sendComment() {
   if (!isAuth) {
-    alert('Пожалуйста, войдите, чтобы оставить комментарий.');
+    alert("Пожалуйста, войдите, чтобы оставить комментарий.");
     return;
   }
-
   if (commentLoadingEl) {
-    commentLoadingEl.style.display = 'flex';
+    commentLoadingEl.style.display = "flex";
   }
-
   addButton.disabled = true;
-
   const name = addNameEl.value.trim();
   const text = addTextEl.value.trim();
-
   if (!name || !text) {
-    alert('Заполните все поля');
+    alert("Заполните все поля");
     addButton.disabled = false;
     if (commentLoadingEl) {
-      commentLoadingEl.style.display = 'none';
+      commentLoadingEl.style.display = "none";
     }
     return;
   }
-
-  fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ name, text }),
-    headers: {
-      'Authorization': 'Bearer ' + localStorage.getItem('authToken')
-    }
-  })
-  .then(res => {
+  try {
+    const token = localStorage.getItem("authToken");
+    const res = await fetch(API_COMMENTS_URL, {
+      method: "POST",
+      body: JSON.stringify({ name, text }),
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    });
     if (!res.ok) {
-      return res.text().then(text => {
-        console.error('Ошибка при отправке:', res.status, text);
-        alert(`Ошибка при отправке комментария: ${res.status}`);
-        throw new Error(`HTTP ${res.status}`);
-      });
+      const errorData = await res.json();
+      alert(
+        `Ошибка при отправке комментария: ${res.status} - ${errorData.message}`
+      );
+      throw new Error(`HTTP ${res.status}`);
     }
-    return res.json();
-  })
-  .then(() => loadComments())
-  .catch(err => {
-    if (err.message.includes('Failed to fetch')) alert('Проблемы с соединением');
-    else console.error(err);
-  })
-  .finally(() => {
+    await loadComments();
+    addTextEl.value = "";
+  } catch (err) {
+    console.error(err);
+  } finally {
     addButton.disabled = false;
     if (commentLoadingEl) {
-      commentLoadingEl.style.display = 'none';
+      commentLoadingEl.style.display = "none";
     }
-  });
+  }
 }
 
 // Обработчики кнопок
@@ -227,75 +235,116 @@ addButton.onclick = () => {
 };
 
 // Вход через модальное окно
-document.getElementById('btn-login').onclick = () => {
-  loginModal.style.display = 'flex';
+document.getElementById("btn-login").onclick = () => {
+  loginModal.style.display = "flex";
 };
 
 // Войти по форме
-document.getElementById('login-submit').onclick = () => {
+document.getElementById("login-submit").onclick = () => {
   const login = loginInput.value.trim();
   const password = passwordInput.value.trim();
-  if (login && password) {
-    // Используем фиктивный токен
-    localStorage.setItem('authToken', 'dummy-token');
-    localStorage.setItem('userName', login);
-    loginModal.style.display = 'none';
-    updateUI();
-    fillAuthorField();
-  } else {
-    alert('Введите логин и пароль');
-  }
+
+  fetch(API_LOGIN_URL, {
+    method: "POST",
+    body: JSON.stringify({ login, password }),
+  })
+    .then((res) => {
+      if (res.status === 201) {
+        return res.json();
+      } else if (res.status === 400) {
+        return res.json().then((data) => {
+          alert(`Ошибка входа: ${data.message || "Неверный логин или пароль"}`);
+          throw new Error("Login error");
+        });
+      } else {
+        throw new Error(`HTTP ${res.status}`);
+      }
+    })
+    .then((data) => {
+      localStorage.setItem("authToken", data.user.token);
+      localStorage.setItem("userName", data.user.login);
+      updateUI();
+      fillAuthorField();
+      document.getElementById("login-modal").style.display = "none";
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 };
 
 // Выйти
 btnLogout.onclick = () => {
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('userName');
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("userName");
   updateUI();
 };
 
 // Открытие экрана регистрации
-document.getElementById('auth-link').onclick = (e) => {
+document.getElementById("auth-link").onclick = (e) => {
   e.preventDefault();
-  registerScreen.style.display = 'flex';
+  document.getElementById("register-screen").style.display = "flex";
 };
 
 // Обработка регистрации
-document.getElementById('register-submit').onclick = () => {
-  const login = document.getElementById('register-login').value.trim();
-  const password = document.getElementById('register-password').value.trim();
+document.getElementById("register-submit").onclick = () => {
+  const login = document.getElementById("register-login").value.trim();
+  const password = document.getElementById("register-password").value.trim();
+  const name = prompt("Введите ваше имя для регистрации"); // или используйте отдельное поле
 
-  if (!login || !password) {
-    alert('Пожалуйста, введите логин и пароль');
+  if (!login || !password || !name) {
+    alert("Заполните все поля");
     return;
   }
 
-  // Имитация регистрации
-  localStorage.setItem('authToken', 'dummy-token');
-  localStorage.setItem('userName', login);
-  updateUI();
-  fillAuthorField();
-  document.getElementById('register-screen').style.display = 'none';
+  fetch("https://wedev-api.sky.pro/api/user", {
+    method: "POST",
+    headers: {
+    },
+    body: JSON.stringify({ login, name, password }),
+  })
+    .then((res) => {
+      if (res.status === 201) {
+        return res.json();
+      } else if (res.status === 400) {
+        return res.json().then((data) => {
+          if (data.error && data.error.includes("уже существует")) {
+            alert("Этот логин уже занят. Попробуйте другой.");
+          } else {
+            alert(`Ошибка регистрации: ${data.error || "Неизвестная ошибка"}`);
+          }
+          throw new Error("Registration error");
+        });
+      } else {
+        throw new Error(`HTTP ${res.status}`);
+      }
+    })
+    .then((data) => {
+      // После успешной регистрации автоматически логинимся
+      localStorage.setItem("authToken", data.user.token);
+      localStorage.setItem("userName", data.user.name);
+      updateUI();
+      fillAuthorField();
+      document.getElementById("register-screen").style.display = "none";
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 };
 
-// Закрытие регистрации
-document.getElementById('close-register').onclick = () => {
-  document.getElementById('register-screen').style.display = 'none';
+// Закрытие модальных окон
+document.getElementById("close-register").onclick = () => {
+  document.getElementById("register-screen").style.display = "none";
 };
-
-// Обработка закрытия модального окна входа
-document.getElementById('close-login').onclick = () => {
-  loginModal.style.display = 'none';
+document.getElementById("close-login").onclick = () => {
+  loginModal.style.display = "none";
 };
-
-// Закрытие модальных окон при клике вне содержимого
 loginModal.onclick = (e) => {
-  if (e.target === loginModal) loginModal.style.display = 'none';
+  if (e.target === loginModal) loginModal.style.display = "none";
 };
 
 // Инициализация
 window.onload = () => {
-  loadComments();
   updateUI();
+  loadComments();
   fillAuthorField();
 };

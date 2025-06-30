@@ -14,9 +14,11 @@
 <!-- Основной контейнер -->
 <div class="container">
   <!-- Кнопки входа/выхода -->
-<button id="btn-login">Войти</button>
-<button id="btn-logout" style="display:none;">Выйти</button>
-<a href="#" id="auth-link">Регистрация</a>
+  <div class="auth-buttons">
+    <button id="btn-login">Войти</button>
+    <button id="btn-logout" style="display:none;">Выйти</button>
+    <a href="#" id="auth-link">Регистрация</a>
+  </div>
 
   <!-- Список комментариев -->
   <ul class="comments"></ul>
@@ -31,6 +33,7 @@
     <!-- Добавляем элемент загрузки -->
     <div class="comment-loading" style="display: none;">Загрузка...</div>
   </div>
+</div>
 
 <!-- Модальное окно входа -->
 <div id="login-modal" class="modal">
