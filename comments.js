@@ -1,104 +1,113 @@
 "use strict";
 
-const API_URL = "https://wedev-api.sky.pro/api/v1/zaritskayaanya/comments";
+const API_COMMENTS_URL =
+  "https://wedev-api.sky.pro/api/v1/zaritskayaanya/comments";
+const API_USER_URL = "https://wedev-api.sky.pro/api/user";
+const API_LOGIN_URL = "https://wedev-api.sky.pro/api/user/login";
 
-const addFormButton = document.querySelector('.add-form-button');
-const addFormNameInput = document.querySelector('.add-form-name');
-const addFormTextInput = document.querySelector('.add-form-text');
-const commentsList = document.querySelector('.comments');
-const commentLoadingDiv = document.getElementById('comment-loading');
-const loadingScreen = document.getElementById('loading-screen');
-
-let formData = {
-  name: '',
-  text: ''
-};
-
-// Обновляем переменные при вводе
-addFormNameInput.addEventListener('input', () => {
-  formData.name = addFormNameInput.value;
-});
-addFormTextInput.addEventListener('input', () => {
-  formData.text = addFormTextInput.value;
-});
-
-// Показываем/скрываем лоадер загрузки комментариев
-window.addEventListener('load', () => {
-  loadingScreen.style.display = 'flex';
-  loadComments().then(() => {
-    loadingScreen.style.display = 'none';
-  });
-});
-
-// Функции для управления индикатором отправки комментария
-function showCommentLoading() {
-  commentLoadingDiv.style.display = 'flex';
-}
-function hideCommentLoading() {
-  commentLoadingDiv.style.display = 'none';
-}
-
-// Форматирование даты
-function formatDate(date) {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${day}.${month}.${year} ${hours}:${minutes}`;
-}
-
-// Безопасная обработка
-function sanitizeInput(str) {
-  return str
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
+const commentsEl = document.querySelector(".comments");
+const addNameEl = document.querySelector(".add-form-name");
+const addTextEl = document.querySelector(".add-form-text");
+const addButton = document.querySelector(".add-form-button");
+const loadingScreen = document.getElementById("loading-screen");
+const commentLoadingEl = document.querySelector(".comment-loading");
+const btnLogin = document.getElementById("btn-login");
+const btnLogout = document.getElementById("btn-logout");
+const loginModal = document.getElementById("login-modal");
+const loginInput = document.getElementById("login-input");
+const passwordInput = document.getElementById("password-input");
+const authLink = document.getElementById("auth-link");
+const registerScreen = document.getElementById("register-screen");
 
 let commentsData = [];
+let isAuth = false;
+
+// Проверка авторизации
+async function checkAuth() {
+  const token = localStorage.getItem("authToken");
+  if (!token) return false;
+  try {
+    const res = await fetch(API_USER_URL, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    });
+    if (res.ok) {
+      return true;
+    } else {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userName");
+      return false;
+    }
+  } catch {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userName");
+    return false;
+  }
+}
+
+// Обновление UI
+async function updateUI() {
+  isAuth = await checkAuth();
+  if (isAuth) {
+    addButton.disabled = false;
+    document.querySelector(".add-form").style.display = "flex";
+    document.querySelector("#auth-link").style.display = "none";
+    btnLogin.style.display = "none";
+    btnLogout.style.display = "inline-block";
+    fillAuthorField();
+  } else {
+    addButton.disabled = true;
+    document.querySelector(".add-form").style.display = "none";
+    document.querySelector("#auth-link").style.display = "block";
+    btnLogin.style.display = "inline-block";
+    btnLogout.style.display = "none";
+    addNameEl.value = "";
+  }
+}
+
+// Заполняем имя автора
+function fillAuthorField() {
+  const authorField = document.querySelector(".add-form-name");
+  if (!authorField) return;
+  authorField.setAttribute("readonly", "readonly");
+  if (isAuth) {
+    const login = localStorage.getItem("userName") || "Аноним";
+    authorField.value = login;
+  } else {
+    authorField.value = "";
+  }
+}
 
 // Загрузка комментариев
-function fetchComments() {
-  return fetch(API_URL)
-    .then(response => {
-      if (!response.ok) {
-        if (response.status === 500) {
-          alert('Ошибка сервера при загрузке комментариев. Попробуйте позже.');
-        } else {
-          alert(`Ошибка при загрузке комментариев: ${response.status}`);
-        }
-        throw new Error(`HTTP ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      commentsData = data.comments;
-      renderComments();
-    })
-    .catch(error => {
-      if (error.message.includes('Failed to fetch')) {
-        alert('Проблемы с соединением: проверьте интернет');
-      } else {
-        console.error('Ошибка:', error);
-      }
-    });
+async function loadComments() {
+  loadingScreen.style.display = "flex";
+  try {
+    const res = await fetch(API_COMMENTS_URL);
+    if (!res.ok) {
+      if (res.status === 500)
+        alert("Ошибка сервера при загрузке комментариев.");
+      else alert(`Ошибка при загрузке комментариев: ${res.status}`);
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    commentsData = data.comments;
+    renderComments();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    loadingScreen.style.display = "none";
+  }
 }
 
-function loadComments() {
-  return fetchComments();
-}
-
-// Отображение комментариев
+// Отрисовка комментариев
 function renderComments() {
-  commentsList.innerHTML = '';
+  commentsEl.innerHTML = "";
   commentsData.forEach((comment, index) => {
-    const likeActiveClass = comment.isLiked ? "-active-like" : "";
-    const dateObj = new Date(comment.date);
-    const formattedDate = formatDate(dateObj);
-    commentsList.innerHTML += `
+    const date = new Date(comment.date);
+    const formattedDate = formatDate(date);
+    const likeClass = comment.isLiked ? "-active-like" : "";
+    commentsEl.innerHTML += `
       <li class="comment" data-index="${index}">
         <div class="comment-header">
           <div>${sanitizeInput(comment.author.name)}</div>
@@ -109,48 +118,64 @@ function renderComments() {
         </div>
         <div class="comment-footer">
           <div class="likes">
-            <span class="likes-counter">${comment.likes}</span>
-            <button class="like-button ${likeActiveClass}"></button>
+            <button class="like-button ${likeClass}"></button>
+            <div class="likes-counter">${comment.likes}</div>
           </div>
         </div>
-      </li>`;
+      </li>
+    `;
   });
-  addQuoteOnCommentClick();
-  addLikeButtonHandlers();
+  addQuoteHandlers();
+  addLikeHandlers();
+}
+
+// Форматирование даты
+function formatDate(date) {
+  const d = String(date.getDate()).padStart(2, "0");
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const y = date.getFullYear();
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  return `${d}.${m}.${y} ${hh}:${mm}`;
+}
+
+// Безопасное отображение
+function sanitizeInput(str) {
+  return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 // Обработка цитаты
-function addQuoteOnCommentClick() {
-  document.querySelectorAll('.comment').forEach((commentElem, index) => {
-    // Обновляем обработчик
-    commentElem.replaceWith(commentElem.cloneNode(true));
-    commentElem = document.querySelectorAll('.comment')[index];
-
-    commentElem.addEventListener('click', () => {
+function addQuoteHandlers() {
+  document.querySelectorAll(".comment").forEach((elem, index) => {
+    elem.onclick = () => {
       const comment = commentsData[index];
-      const sanitizedText = sanitizeInput(comment.text);
-      const sanitizedName = sanitizeInput(comment.author.name);
-      const quoteText = `> ${sanitizedText}\n`;
-      addFormNameInput.value = sanitizedName;
-      addFormTextInput.value = quoteText;
-      // Обновляем переменные
-      formData.name = sanitizedName;
-      formData.text = quoteText;
-    });
+      const quoteText = `> ${sanitizeInput(comment.text)}\n`;
+      addNameEl.value = sanitizeInput(comment.author.name);
+      addTextEl.value = quoteText;
+    };
   });
 }
 
 // Обработка лайков
-function addLikeButtonHandlers() {
-  document.querySelectorAll('.like-button').forEach((button, idx) => {
-    button.addEventListener('click', (event) => {
-      event.stopPropagation();
-      toggleLike(idx);
-    });
+function addLikeHandlers() {
+  document.querySelectorAll(".like-button").forEach((btn, index) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      toggleLike(index);
+    };
   });
 }
 
 function toggleLike(index) {
+  if (!isAuth) {
+    alert("Пожалуйста, войдите, чтобы ставить лайки.");
+    return;
+  }
   const comment = commentsData[index];
   comment.isLiked = !comment.isLiked;
   comment.likes += comment.isLiked ? 1 : -1;
@@ -158,72 +183,169 @@ function toggleLike(index) {
 }
 
 // Отправка комментария
-function sendComment() {
-  // Блокируем кнопку
-  addFormButton.disabled = true;
-  showCommentLoading();
+async function sendComment() {
+  if (!isAuth) {
+    alert("Пожалуйста, войдите, чтобы оставить комментарий.");
+    return;
+  }
+  if (commentLoadingEl) {
+    commentLoadingEl.style.display = "flex";
+  }
+  addButton.disabled = true;
+  const name = addNameEl.value.trim();
+  const text = addTextEl.value.trim();
+  if (!name || !text) {
+    alert("Заполните все поля");
+    addButton.disabled = false;
+    if (commentLoadingEl) {
+      commentLoadingEl.style.display = "none";
+    }
+    return;
+  }
+  try {
+    const token = localStorage.getItem("authToken");
+    const res = await fetch(API_COMMENTS_URL, {
+      method: "POST",
+      body: JSON.stringify({ name, text }),
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      alert(
+        `Ошибка при отправке комментария: ${res.status} - ${errorData.message}`
+      );
+      throw new Error(`HTTP ${res.status}`);
+    }
+    await loadComments();
+    addTextEl.value = "";
+  } catch (err) {
+    console.error(err);
+  } finally {
+    addButton.disabled = false;
+    if (commentLoadingEl) {
+      commentLoadingEl.style.display = "none";
+    }
+  }
+}
 
-  // Вставляем текущие данные из переменной
-  addFormNameInput.value = formData.name;
-  addFormTextInput.value = formData.text;
+// Обработчики кнопок
+addButton.onclick = () => {
+  sendComment();
+};
 
-  const name = formData.name.trim();
-  const text = formData.text.trim();
+// Вход через модальное окно
+document.getElementById("btn-login").onclick = () => {
+  loginModal.style.display = "flex";
+};
 
-  if (name === "" || text === "") {
-    alert("Пожалуйста, заполните все поля!");
-    addFormButton.disabled = false;
-    hideCommentLoading();
+// Войти по форме
+document.getElementById("login-submit").onclick = () => {
+  const login = loginInput.value.trim();
+  const password = passwordInput.value.trim();
+
+  fetch(API_LOGIN_URL, {
+    method: "POST",
+    body: JSON.stringify({ login, password }),
+  })
+    .then((res) => {
+      if (res.status === 201) {
+        return res.json();
+      } else if (res.status === 400) {
+        return res.json().then((data) => {
+          alert(`Ошибка входа: ${data.message || "Неверный логин или пароль"}`);
+          throw new Error("Login error");
+        });
+      } else {
+        throw new Error(`HTTP ${res.status}`);
+      }
+    })
+    .then((data) => {
+      localStorage.setItem("authToken", data.user.token);
+      localStorage.setItem("userName", data.user.login);
+      updateUI();
+      fillAuthorField();
+      document.getElementById("login-modal").style.display = "none";
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
+
+// Выйти
+btnLogout.onclick = () => {
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("userName");
+  updateUI();
+};
+
+// Открытие экрана регистрации
+document.getElementById("auth-link").onclick = (e) => {
+  e.preventDefault();
+  document.getElementById("register-screen").style.display = "flex";
+};
+
+// Обработка регистрации
+document.getElementById("register-submit").onclick = () => {
+  const login = document.getElementById("register-login").value.trim();
+  const password = document.getElementById("register-password").value.trim();
+  const name = prompt("Введите ваше имя для регистрации"); // или используйте отдельное поле
+
+  if (!login || !password || !name) {
+    alert("Заполните все поля");
     return;
   }
 
-  const payload = {
-    name,
-    text,
-    forceError: false 
-  };
-
-  fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload),
+  fetch("https://wedev-api.sky.pro/api/user", {
+    method: "POST",
     headers: {
-     // 'Content-Type': 'application/json'
-    }
+    },
+    body: JSON.stringify({ login, name, password }),
   })
-  .then(response => {
-    if (!response.ok) {
-      if (response.status === 400) {
-        alert('Ошибка: неверные данные при добавлении комментария');
-      } else if (response.status === 500) {
-        alert('Ошибка сервера при добавлении комментария. Попробуйте позже.');
+    .then((res) => {
+      if (res.status === 201) {
+        return res.json();
+      } else if (res.status === 400) {
+        return res.json().then((data) => {
+          if (data.error && data.error.includes("уже существует")) {
+            alert("Этот логин уже занят. Попробуйте другой.");
+          } else {
+            alert(`Ошибка регистрации: ${data.error || "Неизвестная ошибка"}`);
+          }
+          throw new Error("Registration error");
+        });
       } else {
-        alert(`Произошла ошибка: ${response.status}`);
+        throw new Error(`HTTP ${res.status}`);
       }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    return response.json();
-  })
-  .then(() => {
-    return fetchComments();
-  })
-  .then(() => {
-    
-  })
-  .catch(error => {
-    if (error.message.includes('Failed to fetch')) {
-      alert('Проблемы с соединением: проверьте интернет');
-    } else {
-      console.error('Ошибка:', error);
-    }
-  })
-  .finally(() => {
-    hideCommentLoading();
-    addFormButton.disabled = false;
-  });
-}
+    })
+    .then((data) => {
+      // После успешной регистрации автоматически логинимся
+      localStorage.setItem("authToken", data.user.token);
+      localStorage.setItem("userName", data.user.name);
+      updateUI();
+      fillAuthorField();
+      document.getElementById("register-screen").style.display = "none";
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
 
-// Обработчик кнопки
-addFormButton.addEventListener("click", () => {
-  sendComment();
-});
+// Закрытие модальных окон
+document.getElementById("close-register").onclick = () => {
+  document.getElementById("register-screen").style.display = "none";
+};
+document.getElementById("close-login").onclick = () => {
+  loginModal.style.display = "none";
+};
+loginModal.onclick = (e) => {
+  if (e.target === loginModal) loginModal.style.display = "none";
+};
 
+// Инициализация
+window.onload = () => {
+  updateUI();
+  loadComments();
+  fillAuthorField();
+};

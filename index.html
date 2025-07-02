@@ -1,30 +1,65 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<title>Проект "Комменты"</title>
+<meta charset="UTF-8" />
+<title>Комментарии с авторизацией</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="loading-screen" class="loading-screen">
-    <div class="spinner">
-    </div>
-    <p>Загрузка...</p>
+<!-- Загрузка -->
+<div id="loading-screen" class="loading-screen">
+  <div class="spinner"></div>
+  <p>Загрузка...</p>
+</div>
+<!-- Основной контейнер -->
+<div class="container">
+  <!-- Кнопки входа/выхода -->
+  <div class="auth-buttons">
+    <button id="btn-login">Войти</button>
+    <button id="btn-logout" style="display:none;">Выйти</button>
+    <a href="#" id="auth-link">Регистрация</a>
   </div>
-  <div class="container">
-    <ul class="comments"></ul>
-    <div id="comment-loading" class="comment-loading" style="display: none;">
-      <div class="spinner"></div>
-      <span>Отправка комментария...</span>
+
+  <!-- Список комментариев -->
+  <ul class="comments"></ul>
+
+  <!-- Форма добавления комментария (скрыта, если не авторизован) -->
+  <div class="add-form" style="display:none;">
+    <input type="text" class="add-form-name" placeholder="Введите ваше имя" readonly/>
+    <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
+    <div class="add-form-row">
+      <button class="add-form-button">Написать</button>
     </div>
-    <div class="add-form">
-      <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-      <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
-      <div class="add-form-row">
-        <button class="add-form-button">Написать</button>
-      </div>
-    </div>
+    <!-- Добавляем элемент загрузки -->
+    <div class="comment-loading" style="display: none;">Загрузка...</div>
   </div>
+</div>
+
+<!-- Модальное окно входа -->
+<div id="login-modal" class="modal">
+  <div class="modal-content">
+    <h2>Войти</h2>
+    <input type="text" id="login-input" placeholder="Логин" />
+    <br />
+    <input type="password" id="password-input" placeholder="Пароль" />
+    <br />
+    <button id="login-submit">Войти</button>
+    <button id="close-login">Отмена</button>
+  </div>
+</div>
+<!-- Экран регистрации -->
+<div id="register-screen" class="modal">
+  <div class="modal-content">
+    <h2>Регистрация</h2>
+    <input type="text" id="register-login" placeholder="Логин" />
+    <br />
+    <input type="password" id="register-password" placeholder="Пароль" />
+    <br />
+    <button id="register-submit">Зарегистрироваться</button>
+    <button id="close-register">Отмена</button>
+  </div>
+</div>
+
 <script src="comments.js"></script>
 </body>
 </html>
