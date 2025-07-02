@@ -70,6 +70,7 @@ async function updateUI() {
 function fillAuthorField() {
   const authorField = document.querySelector(".add-form-name");
   if (!authorField) return;
+  authorField.setAttribute("readonly", "readonly");
   if (isAuth) {
     const login = localStorage.getItem("userName") || "Аноним";
     authorField.value = login;
