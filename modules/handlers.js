@@ -17,6 +17,7 @@ export function initialize() {
   const authLink = document.getElementById('auth-link');
   const registerScreen = document.getElementById('register-screen');
 
+  // Переменная авторизации
   let isAuth = false;
 
   // Инициализация
@@ -41,6 +42,7 @@ export function initialize() {
   btnLogout.onclick = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userName');
+    isAuth = false; // Обновляем переменную
     updateUI();
   };
 
@@ -64,10 +66,11 @@ export function initialize() {
   // Вход по клику вне модальных окон
   document.getElementById('login-modal').onclick = (e) => {
     if (e.target === document.getElementById('login-modal')) {
-      document.getElementById('login-modal').style.display = 'none';
+      loginModal.style.display = 'none';
     }
   };
 
+  // Загрузка комментариев при старте
   window.onload = () => {
     updateUI();
     loadComments();
@@ -96,11 +99,6 @@ export function initialize() {
   }
 
   function updateUI() {
-    // Обновление интерфейса
-    // Показывать/скрывать элементы в зависимости от авторизации
-    // Например:
-    // document.querySelector('.add-form').style.display = isAuth ? 'flex' : 'none';
-    // и т.д.
     const addForm = document.querySelector('.add-form');
     if (isAuth) {
       addForm.style.display = 'flex';
@@ -226,45 +224,7 @@ export function initialize() {
     }
   }
 
-  // Вход и регистрация
-  document.getElementById('btn-login').onclick = () => {
-    document.getElementById('login-modal').style.display = 'flex';
-  };
-
-  document.getElementById('login-submit').onclick = () => {
-    loginUser();
-  };
-
-  document.getElementById('btn-logout').onclick = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userName');
-    updateUI();
-  };
-
-  document.getElementById('auth-link').onclick = (e) => {
-    e.preventDefault();
-    document.getElementById('register-screen').style.display = 'flex';
-  };
-
-  document.getElementById('register-submit').onclick = () => {
-    registerUser();
-  };
-
-  document.getElementById('close-register').onclick = () => {
-    document.getElementById('register-screen').style.display = 'none';
-  };
-
-  document.getElementById('close-login').onclick = () => {
-    document.getElementById('login-modal').style.display = 'none';
-  };
-
-  // Вход по клику вне модальных окон
-  document.getElementById('login-modal').onclick = (e) => {
-    if (e.target === document.getElementById('login-modal')) {
-      document.getElementById('login-modal').style.display = 'none';
-    }
-  };
-
+  // Вход пользователя
   async function loginUser() {
     const login = document.getElementById('login-input').value.trim();
     const password = document.getElementById('password-input').value.trim();
@@ -277,6 +237,9 @@ export function initialize() {
         const data = await res.json();
         localStorage.setItem('authToken', data.user.token);
         localStorage.setItem('userName', data.user.login);
+        // Обновляем переменную авторизации
+        isAuth = true;
+        // Обновляем интерфейс
         updateUI();
         fillAuthorField();
         document.getElementById('login-modal').style.display = 'none';
@@ -291,6 +254,7 @@ export function initialize() {
     }
   }
 
+  // Регистрация
   async function registerUser() {
     const login = document.getElementById('register-login').value.trim();
     const password = document.getElementById('register-password').value.trim();
@@ -308,6 +272,8 @@ export function initialize() {
         const data = await res.json();
         localStorage.setItem('authToken', data.user.token);
         localStorage.setItem('userName', data.user.name);
+        // Обновляем переменную авторизации
+        isAuth = true;
         updateUI();
         fillAuthorField();
         document.getElementById('register-screen').style.display = 'none';
